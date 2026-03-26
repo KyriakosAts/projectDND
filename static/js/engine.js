@@ -706,8 +706,8 @@ class GameScene extends Phaser.Scene {
       .then(r => r.json())
       .then(data => {
         if (data.success) {
-          // Rebuild sprite caches
-          this.onNewGameButton(); // clears sprites
+          // Rebuild all sprite caches and re-fetch state from server
+          this.onNewGameButton();
           setTimeout(() => this._fetchState(), 50);
         } else {
           this._addLog("⚠ " + (data.error || "Load failed."), "info");
