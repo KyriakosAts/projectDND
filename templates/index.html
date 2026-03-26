@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hero Quest: Digital Edition</title>
+
+  <!-- Bootstrap 5 layout (served locally) -->
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+
+  <!-- Our dark fantasy styles -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<div id="app-wrapper">
+
+  <!-- ====== HEADER ====================================================== -->
+  <header id="game-header">
+    <h1>Hero Quest</h1>
+    <div class="subtitle">Digital Edition &nbsp;·&nbsp; The Trial of Witchwood</div>
+  </header>
+
+  <!-- ====== MAIN LAYOUT ================================================= -->
+  <div id="main-layout">
+
+    <!-- ── Left: Dungeon Log ─────────────────────────────────────────── -->
+    <aside id="log-panel">
+      <div class="panel-title">📜 Dungeon Log</div>
+      <div id="dungeon-log" data-count="0" role="log" aria-live="polite"></div>
+    </aside>
+
+    <!-- ── Center: Game Canvas + Controls ───────────────────────────── -->
+    <main id="center-panel">
+
+      <!-- Turn banner -->
+      <div id="turn-banner">
+        <div class="turn-name">Loading...</div>
+        <div class="turn-info" style="font-size:0.72rem;color:var(--text-dim);margin-top:2px"></div>
+      </div>
+
+      <!-- Phaser canvas container -->
+      <div id="game-container" style="position:relative;">
+        <!-- Phaser renders here -->
+
+        <!-- Victory / Defeat overlay -->
+        <div id="outcome-overlay">
+          <h2>⚔ Victory! ⚔</h2>
+          <p>The dungeon has been cleansed.</p>
+          <button id="btn-new-game-overlay" class="btn-fantasy" style="font-size:0.9rem;padding:10px 22px;">
+            Play Again
+          </button>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div id="action-bar">
+        <button id="btn-move"     class="btn-fantasy" title="Move your hero">⚑ Move</button>
+        <button id="btn-attack"   class="btn-fantasy btn-danger" title="Attack an enemy">⚔ Attack</button>
+        <button id="btn-spell"    class="btn-fantasy" style="border-color:#4455aa;color:#aabbff;" title="Cast a spell">✨ Spell</button>
+        <button id="btn-search"   class="btn-fantasy" title="Search for traps and secrets">🔍 Search</button>
+        <button id="btn-end-turn" class="btn-fantasy btn-end" title="End your turn">↩ End Turn</button>
+      </div>
+
+      <!-- Spell selector (shown when a caster clicks Spell) -->
+      <div id="spell-selector"></div>
+
+      <!-- Save / Load / New Game -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+        <button id="btn-new-game" class="btn-fantasy" style="font-size:0.7rem;padding:5px 10px;" title="Start a new game">⟳ New Game</button>
+        <button id="btn-save"     class="btn-fantasy" style="font-size:0.7rem;padding:5px 10px;" title="Save game">💾 Save</button>
+        <button id="btn-load"     class="btn-fantasy" style="font-size:0.7rem;padding:5px 10px;" title="Load game">📂 Load</button>
+      </div>
+
+    </main>
+
+    <!-- ── Right: Hero Status ────────────────────────────────────────── -->
+    <aside id="hero-panel">
+      <div class="panel-title">🛡 Heroes</div>
+      <div id="hero-cards">
+        <!-- Populated by engine.js -->
+        <div style="padding:10px;color:var(--text-dim);font-size:0.75rem;">Loading heroes…</div>
+      </div>
+
+      <!-- Enemy tracker -->
+      <div class="panel-title" style="margin-top:auto;border-top:1px solid var(--border);">
+        👹 Enemies
+      </div>
+      <div id="enemy-tracker" style="padding:8px 12px;font-size:0.72rem;color:var(--text-dim);">
+        <!-- Populated below -->
+      </div>
+
+      <!-- Legend -->
+      <div style="padding:8px 12px;border-top:1px solid rgba(90,58,16,0.4);font-size:0.65rem;color:var(--text-dim);line-height:1.7;">
+        <strong style="color:var(--gold-dim);">Controls</strong><br/>
+        <span style="color:#88cc88;">■</span> Move tile &nbsp;
+        <span style="color:#cc4444;">■</span> Attack tile<br/>
+        <span style="color:#6688ff;">■</span> Spell tile<br/>
+        Click tile after selecting action.
+      </div>
+    </aside>
+
+  </div><!-- /#main-layout -->
+
+  <!-- ====== FOOTER ====================================================== -->
+  <footer id="game-footer">
+    Hero Quest: Digital Edition &nbsp;·&nbsp; Powered by Phaser 3 &amp; Flask
+  </footer>
+
+</div><!-- /#app-wrapper -->
+
+<!-- ====== SCRIPTS ======================================================= -->
+<!-- Phaser 3 (served locally) -->
+<script src="/static/js/phaser.min.js"></script>
+
+<!-- Our game files -->
+<script src="/static/js/assets.js"></script>
+<script src="/static/js/engine.js"></script>
+
+<script>
+  // -----------------------------------------------------------------------
+  // Enemy tracker (updated by polling game state)
+  // -----------------------------------------------------------------------
+  function updateEnemyTracker(state) {
+    const tracker = document.getElementById("enemy-tracker");
+    if (!tracker || !state) return;
+    tracker.innerHTML = "";
+    state.enemies.forEach(e => {
+      const pct   = Math.max(0, e.hp / e.max_hp);
+      const color = pct > 0.5 ? "#aa3333" : "#661111";
+      const alive = e.alive;
+      const div   = document.createElement("div");
+      div.style.cssText = `margin-bottom:5px;opacity:${alive ? 1 : 0.35}`;
+      div.innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+          <span style="color:${e.color};font-size:0.7rem;">${e.name}</span>
+          <span style="font-size:0.65rem;">${alive ? `${e.hp}/${e.max_hp}` : "✕"}</span>
+        </div>
+        ${alive ? `<div style="height:4px;background:#111;border-radius:2px;">
+          <div style="width:${Math.round(pct*100)}%;height:100%;background:${color};border-radius:2px;"></div>
+        </div>` : ""}
+      `;
+      tracker.appendChild(div);
+    });
+  }
+
+  // Poll state every 2s to keep enemy tracker updated
+  setInterval(() => {
+    fetch("/api/state")
+      .then(r => r.json())
+      .then(d => updateEnemyTracker(d.state))
+      .catch(() => {});
+  }, 2000);
+</script>
+
+</body>
+</html>

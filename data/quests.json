@@ -1,0 +1,14 @@
+{
+  "current_quest": "trial_of_witchwood",
+  "quests": {
+    "trial_of_witchwood": {
+      "name": "The Trial of Witchwood",
+      "description": "The heroes must venture into the haunted dungeon of Witchwood and defeat the Chaos Warrior and his goblin minions!",
+      "objective": "Defeat all enemies",
+      "enemies": ["goblin_1", "goblin_2", "zombie_1", "chaos_warrior"],
+      "win_condition": "all_enemies_defeated",
+      "intro_text": "Dark clouds gather over the land as you enter the cursed dungeon of Witchwood. Strange sounds echo through the stone corridors...",
+      "complete_text": "Victory! The dungeon has been cleansed. The heroes emerge triumphant from Witchwood!"
+    }
+  }
+}
